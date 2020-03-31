@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+      }
+    </script>
+    <!-- <script src="./fetch.js"></script> -->\
+    <!-- Fetch google api key from back end, create a new script tag with google api url. Add key and append script tag-->
+    <script>
+        function fetchKeyAndLoad() {
+            console.log('loading!')
+            function load_js(key) {
+                var head= document.getElementsByTagName('head')[0];
+                var script= document.createElement('script');
+                script.src= `https://maps.googleapis.com/maps/api/js?key=${key}&callback=initMap`;
+                head.appendChild(script);
+            }
+            fetch('http://localhost:3000/api/googlekey')
+                .then(res=>res.json())
+                .then(data => 
+                    load_js(data.key));
+        }
+        fetchKeyAndLoad();
+     </script>
+    <!-- <script id="map-script" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnnypiAJQz8h6-r4s7Cm90lr8t88FUCkA&callback=initMap"
+    ></script> -->
+    <!-- <script>
+        console.log('you are now in the SECOND script tag')
+        const scriptSource = 'www.nytimes.com'
+        const mapScript = document.querySelector('#map-script')
+        mapScript.src = scriptSource
+        console.log(mapScript)
+    </script>
+    <script>
+        console.log('You are now in the Third script tag')
+    </script> -->
+    
+
+  </body>
+</html>
