@@ -16,10 +16,18 @@
         margin: 0;
         padding: 0;
       }
+      #bird-btn {
+        width: 50%;
+        height: 50%;
+        margin: auto;
+        z-index: 10;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <button id="bird-btn">Hello I am a Button</button>
+
     <script>
       // console.log(new google.maps.Map)
       var map;
@@ -28,11 +36,43 @@
       function initInfoWindow() {
         infoWindow = new google.maps.InfoWindow;
       }
-      function initMap() {
+
+      var observations = [];
+
+      function fetchLocalObs() {
+        fetch('http://localhost:3000/api/birds/40.854038/-73.939323')
+          .then(res=> res.json())
+          .then(data => {
+            data.forEach(datum => {
+            observations.push(datum)
+          })
+            console.log(observations[0])
+          }
+          )
+          
+        // console.log(observations)
+      }
+      // console.log(observations)
+      // {lat: 40.854038, lng: -73.939323}
+
+       async function initMap() {
+        const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
+        const observations = await response.json();
+        const bird = await observations[0];
+
+        const birdLoc = { lat: bird.lat, lng: bird.lng }
+        
+        console.log('this is being called from inside initMap', 'this is the bird: ', bird, 'and this is its location: ', birdLoc)
+        // var bird = observations[0];
+      
+
         map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 40.854038, lng: -73.939323},
+          center: birdLoc,
           zoom: 12
         });
+
+        var marker = new google.maps.Marker({position: birdLoc, map: map});
+
         initInfoWindow();
       }
 
