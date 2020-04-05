@@ -34,18 +34,36 @@
     </select>
 
     <script>
-      // console.log(new google.maps.Map)
+      //Elements
       var map;
+      const birdSelect = document.querySelector('#bird-names');
+      const birdBtn = document.querySelector('#bird-btn');
 
-      const birdSelect = document.querySelector('#bird-names')
+      //State Values
+      //select is the species code of the selected bird, used in a location fetch
+      let selected;
+      let observations = [];
+      let birds = [];
+
+      //Event Listeners
+      birdBtn.addEventListener('click', () => {
+        alert('you hit it!')
+      })
+
+      birdSelect.addEventListener('change', () => {
+        console.log('you changed the select: ', birdSelect.options[birdSelect.options.selectedIndex])
+        selected = birdSelect.options[birdSelect.options.selectedIndex]
+
+        console.log('selected: ', selected.dataset.speciesCode)
+        
+      })
 
       var infoWindow;
       function initInfoWindow() {
         infoWindow = new google.maps.InfoWindow;
       }
 
-      var observations = [];
-      var birdNames = [];
+      
 
       // function fetchLocalObs() {
       //   fetch('http://localhost:3000/api/birds/40.854038/-73.939323')
@@ -63,20 +81,32 @@
       // console.log(observations)
       // {lat: 40.854038, lng: -73.939323}
 
+      //Loading functions, fetch handlers
+
       function mapNames(array) {
-        birdNames = array.map(bird => bird.comName)
-        birdNames.forEach(name => {
+        birds = array.map(bird => bird)
+        birds.forEach(name => {
           const option = document.createElement('option')
-          option.innerText = `${name}`
+          option.innerText = `${name.comName}`
+          option.dataset.speciesCode = `${name.speciesCode}`
           birdSelect.append(option)
         })
+      }
+
+      function fetchBird() {
+        // console.log(selected.dataset.speciesCode)
+        let speciesCode = selected.dataset.speciesCode;
+        fetch(` http://localhost:3000/api/birds/${speciesCode}/40.8826459/-74.1951079`)
+          .then(res=>res.json())
+          //i have the data, now I need to turn each observation into a marker
+          .then(data => console.log(data))
       }
 
 
        async function initMap() {
         const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
         const observations = await response.json();
-        const birdNames = await mapNames(observations);
+        const birds = await mapNames(observations);
         const bird = await observations[0];
 
         const birdLoc = { lat: bird.lat, lng: bird.lng }
