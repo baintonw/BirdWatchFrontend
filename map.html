@@ -27,10 +27,17 @@
   <body>
     <div id="map"></div>
     <button id="bird-btn">Hello I am a Button</button>
+    <select name="bird-names" id="bird-names">
+      <!-- <option value="Red Tailed Hawk">
+        Red Tailed Hawk
+      </option> -->
+    </select>
 
     <script>
       // console.log(new google.maps.Map)
       var map;
+
+      const birdSelect = document.querySelector('#bird-names')
 
       var infoWindow;
       function initInfoWindow() {
@@ -38,26 +45,38 @@
       }
 
       var observations = [];
+      var birdNames = [];
 
-      function fetchLocalObs() {
-        fetch('http://localhost:3000/api/birds/40.854038/-73.939323')
-          .then(res=> res.json())
-          .then(data => {
-            data.forEach(datum => {
-            observations.push(datum)
-          })
-            console.log(observations[0])
-          }
-          )
+      // function fetchLocalObs() {
+      //   fetch('http://localhost:3000/api/birds/40.854038/-73.939323')
+      //     .then(res=> res.json())
+      //     .then(data => {
+      //       data.forEach(datum => {
+      //       observations.push(datum)
+      //     })
+      //       console.log(observations[0])
+      //     }
+      //     )
           
-        // console.log(observations)
-      }
+      //   // console.log(observations)
+      // }
       // console.log(observations)
       // {lat: 40.854038, lng: -73.939323}
+
+      function mapNames(array) {
+        birdNames = array.map(bird => bird.comName)
+        birdNames.forEach(name => {
+          const option = document.createElement('option')
+          option.innerText = `${name}`
+          birdSelect.append(option)
+        })
+      }
+
 
        async function initMap() {
         const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
         const observations = await response.json();
+        const birdNames = await mapNames(observations);
         const bird = await observations[0];
 
         const birdLoc = { lat: bird.lat, lng: bird.lng }
