@@ -46,13 +46,17 @@
       let birds = [];
 
       //Event Listeners
-      birdBtn.addEventListener('click', () => {
+      birdBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         alert('you hit it!')
+        fetchBird(selected);
+        initMap();
       })
 
       birdSelect.addEventListener('change', () => {
         console.log('you changed the select: ', birdSelect.options[birdSelect.options.selectedIndex])
         selected = birdSelect.options[birdSelect.options.selectedIndex]
+        
 
         console.log('selected: ', selected.dataset.speciesCode)
         
@@ -91,24 +95,53 @@
           option.dataset.speciesCode = `${name.speciesCode}`
           birdSelect.append(option)
         })
+        //the inital selected bird is the bird contained in the first option
+        // selected = birdSelect.options[0];
       }
 
-      function fetchBird() {
-        // console.log(selected.dataset.speciesCode)
+      async function fetchBird(selected) {
         let speciesCode = selected.dataset.speciesCode;
-        fetch(` http://localhost:3000/api/birds/${speciesCode}/40.8826459/-74.1951079`)
+        console.log('fetching bird with this species code: ', speciesCode)
+        //correctly fetches with different species code
+        
+        const birdSightings = await fetch(`http://localhost:3000/api/birds/${speciesCode}/40.8826459/-74.1951079`)
           .then(res=>res.json())
+          .then((data) => {
+            return data
+          })
+          // console.log('these are the bird sightings inside fetchBird: ', birdSightings)
+          return birdSightings
+          
           //i have the data, now I need to turn each observation into a marker
-          .then(data => console.log(data))
+          // .then(data => console.log(data))
+      }
+
+      //make markers for each element in given array
+      function makeMarkers(array, map) {
+        let markers = [];
+        for(let i = 0; i < array.length; i++) {
+          let marker = new google.maps.Marker({position: { lat: array[i]["lat"], lng: array[i]["lng"] }, map: map })
+          markers.push(marker)
+        }
+
+        console.log('this should be all the markers: ', markers)
+        return markers
+
       }
 
 
        async function initMap() {
+         //responsible for mapping all seen birds in local area to select tag
         const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
         const observations = await response.json();
         const birds = await mapNames(observations);
-        const bird = await observations[0];
 
+        //all sightings of the selected bird in drop down menu
+        const selectedBirdSightings = await fetchBird(selected);
+
+        console.log('selectedBirdSightings: ', selectedBirdSightings)
+
+        const bird = await observations[0];
         const birdLoc = { lat: bird.lat, lng: bird.lng }
         
         console.log('this is being called from inside initMap', 'this is the bird: ', bird, 'and this is its location: ', birdLoc)
@@ -120,7 +153,10 @@
           zoom: 12
         });
 
-        var marker = new google.maps.Marker({position: birdLoc, map: map});
+        makeMarkers(selectedBirdSightings, map);
+
+
+        // var marker = new google.maps.Marker({position: birdLoc, map: map});
 
         initInfoWindow();
       }
