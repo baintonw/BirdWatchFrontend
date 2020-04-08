@@ -41,24 +41,24 @@
 
       //State Values
       //select is the species code of the selected bird, used in a location fetch
-      let selected;
+      let selected = null;
+      let selectedBirdSightings = [];
       let observations = [];
       let birds = [];
 
       //Event Listeners
       birdBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        alert('you hit it!')
-        fetchBird(selected);
+        alert('you hit it! this is the bird you are searching for: ', selected)
+        // fetchBird(selected);
         initMap();
       })
 
       birdSelect.addEventListener('change', () => {
         console.log('you changed the select: ', birdSelect.options[birdSelect.options.selectedIndex])
         selected = birdSelect.options[birdSelect.options.selectedIndex]
-        
 
-        console.log('selected: ', selected.dataset.speciesCode)
+        console.log('selected species Code: ', selected.dataset.speciesCode)
         
       })
 
@@ -99,8 +99,8 @@
         // selected = birdSelect.options[0];
       }
 
-      async function fetchBird(selected) {
-        let speciesCode = selected.dataset.speciesCode;
+      async function fetchBird(target) {
+        let speciesCode = target.dataset.speciesCode;
         console.log('fetching bird with this species code: ', speciesCode)
         //correctly fetches with different species code
         
@@ -131,15 +131,21 @@
 
 
        async function initMap() {
+         selectedBirdSightings = [];
          //responsible for mapping all seen birds in local area to select tag
         const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
         const observations = await response.json();
         const birds = await mapNames(observations);
 
-        //all sightings of the selected bird in drop down menu
-        const selectedBirdSightings = await fetchBird(selected);
+        
+        //selected Bird Sightings is not updating #########################
+        //fetchBird does not work on init since there is no selected, should not be called every time init is run
+        if(selected) {
+          selectedBirdSightings = await fetchBird(selected);
+        }
 
-        console.log('selectedBirdSightings: ', selectedBirdSightings)
+        //Selected bird sightings are always the first fetch made FOR SOME REASON
+        console.log('selectedBirdSightings: ',  selectedBirdSightings)
 
         const bird = await observations[0];
         const birdLoc = { lat: bird.lat, lng: bird.lng }
@@ -153,6 +159,11 @@
           zoom: 12
         });
 
+        function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+        // deleteMarkers();
         makeMarkers(selectedBirdSightings, map);
 
 
@@ -214,19 +225,5 @@
         }
         fetchKeyAndLoad();
      </script>
-    <!-- <script id="map-script" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnnypiAJQz8h6-r4s7Cm90lr8t88FUCkA&callback=initMap"
-    ></script> -->
-    <!-- <script>
-        console.log('you are now in the SECOND script tag')
-        const scriptSource = 'www.nytimes.com'
-        const mapScript = document.querySelector('#map-script')
-        mapScript.src = scriptSource
-        console.log(mapScript)
-    </script>
-    <script>
-        console.log('You are now in the Third script tag')
-    </script> -->
-    
-
   </body>
 </html>
