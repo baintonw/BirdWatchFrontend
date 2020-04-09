@@ -17,7 +17,7 @@ let search = false;
 //Bird search initializes map, which 
 birdBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  alert('you hit it! this is the bird you are searching for: ', selected)
+  alert('you hit it! this is the bird you are searching for: ', selected.innerText)
   search = true;
   initMap();
 })
@@ -30,10 +30,36 @@ birdSelect.addEventListener('change', () => {
   
 })
 
-var infoWindow;
-function initInfoWindow() {
-  infoWindow = new google.maps.InfoWindow;
-}
+// var infoWindow;
+// var contentString = '<div id="content">'+
+//       '<div id="siteNotice">'+
+//       '</div>'+
+//       '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
+//       '<div id="bodyContent">'+
+//       '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
+//       'sandstone rock formation in the southern part of the '+
+//       'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) '+
+//       'south west of the nearest large town, Alice Springs; 450&#160;km '+
+//       '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major '+
+//       'features of the Uluru - Kata Tjuta National Park. Uluru is '+
+//       'sacred to the Pitjantjatjara and Yankunytjatjara, the '+
+//       'Aboriginal people of the area. It has many springs, waterholes, '+
+//       'rock caves and ancient paintings. Uluru is listed as a World '+
+//       'Heritage Site.</p>'+
+//       '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
+//       'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
+//       '(last visited June 22, 2009).</p>'+
+//       '</div>'+
+//       '</div>';
+// function initInfoWindow() {
+//     var infowindow = new google.maps.InfoWindow({
+//         content: contentString
+//       });
+// }
+  
+// function initInfoWindow() {
+//   infoWindow = new google.maps.InfoWindow;
+// }
 
 //Loading functions, fetch handlers
 
@@ -47,11 +73,12 @@ function mapNames(array) {
   })
 
   //the inital selected bird is the bird contained in the first in the bird array
-  selected = birdSelect.options[0];
+  //this does not reset for some reason
+//   selected = birdSelect.options[0];
 }
 
-async function fetchBird(target) {
-  let speciesCode = target.dataset.speciesCode;
+async function fetchBird(option) {
+  let speciesCode = option.dataset.speciesCode;
   console.log('fetching bird with this species code: ', speciesCode)
   //correctly fetches with different species code
   
@@ -67,17 +94,7 @@ async function fetchBird(target) {
     // .then(data => console.log(data))
 }
 
-//make markers for each element in given array
-function makeMarkers(array, map) {
-  let markers = [];
-  for(let i = 0; i < array.length; i++) {
-    let marker = new google.maps.Marker({position: { lat: array[i]["lat"], lng: array[i]["lng"] }, map: map })
-    markers.push(marker)
-  }
-  console.log('this should be all the markers: ', markers)
-  return markers
 
-}
 
 
  async function initMap() {
@@ -107,8 +124,47 @@ function makeMarkers(array, map) {
     zoom: 12
   });
 
+  var contentString = '<div id="content">'+
+      '<div id="siteNotice">'+
+      '</div>'+
+      '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
+      '<div id="bodyContent">'+
+      '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
+      'sandstone rock formation in the southern part of the '+
+      'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) '+
+      'south west of the nearest large town, Alice Springs; 450&#160;km '+
+      '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major '+
+      'features of the Uluru - Kata Tjuta National Park. Uluru is '+
+      'sacred to the Pitjantjatjara and Yankunytjatjara, the '+
+      'Aboriginal people of the area. It has many springs, waterholes, '+
+      'rock caves and ancient paintings. Uluru is listed as a World '+
+      'Heritage Site.</p>'+
+      '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
+      'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
+      '(last visited June 22, 2009).</p>'+
+      '</div>'+
+      '</div>';
+
+  var infowindow = new google.maps.InfoWindow({
+    content: contentString
+  });
+
+  //make markers for each element in given array
+function makeMarkers(array, map) {
+    let markers = [];
+    for(let i = 0; i < array.length; i++) {
+      let marker = new google.maps.Marker({position: { lat: array[i]["lat"], lng: array[i]["lng"] }, map: map })
+      marker.addListener('click', () => {
+          infowindow.open(map, marker)
+      });
+      markers.push(marker)
+    }
+    console.log('this should be all the markers: ', markers)
+    return markers
+  }
+
   makeMarkers(selectedBirdSightings, map);
-  initInfoWindow();
+//   initInfoWindow();
   search = false;
 }
 
@@ -116,30 +172,30 @@ function makeMarkers(array, map) {
 //infoWindow
 
 // Try HTML5 geolocation.
-if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
+// if(navigator.geolocation){
+//     navigator.geolocation.getCurrentPosition(function(position) {
+//       var pos = {
+//         lat: position.coords.latitude,
+//         lng: position.coords.longitude
+//       };
 
-      infoWindow.setPosition(pos);
-      infoWindow.setContent('Location found.');
-      infoWindow.open(map);
-      map.setCenter(pos);
-    }, function() {
-      handleLocationError(true, infoWindow, map.getCenter());
-    });
-  } else {
-    // Browser doesn't support Geolocation
-    handleLocationError(false, infoWindow, map.getCenter());
-  }
+//       infoWindow.setPosition(pos);
+//       infoWindow.setContent('Location found.');
+//       infoWindow.open(map);
+//       map.setCenter(pos);
+//     }, function() {
+//       handleLocationError(true, infoWindow, map.getCenter());
+//     });
+//   } else {
+//     // Browser doesn't support Geolocation
+//     handleLocationError(false, infoWindow, map.getCenter());
+//   }
 
 
-function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-  infoWindow.setPosition(pos);
-  infoWindow.setContent(browserHasGeolocation ?
-                        'Error: The Geolocation service failed.' :
-                        'Error: Your browser doesn\'t support geolocation.');
-  infoWindow.open(map);
-}
+// function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+//   infoWindow.setPosition(pos);
+//   infoWindow.setContent(browserHasGeolocation ?
+//                         'Error: The Geolocation service failed.' :
+//                         'Error: Your browser doesn\'t support geolocation.');
+//   infoWindow.open(map);
+// }
