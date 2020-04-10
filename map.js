@@ -152,24 +152,29 @@ async function fetchBird(option) {
   var geoLocationWindow = new google.maps.InfoWindow;
 
   // Try HTML5 geolocation.
-if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-
-      geoLocationWindow.setPosition(pos);
-      geoLocationWindow.setContent('Location found.');
-      geoLocationWindow.open(map);
-      map.setCenter(pos);
-    }, function() {
-      handleLocationError(true, geoLocationWindow, map.getCenter());
-    });
-  } else {
-    // Browser doesn't support Geolocation
-    handleLocationError(false, geoLocationWindow, map.getCenter());
+function tryGeolocation() {
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+    
+          geoLocationWindow.setPosition(pos);
+          geoLocationWindow.setContent('Location found.');
+          geoLocationWindow.open(map);
+          map.setCenter(pos);
+        }, function() {
+          handleLocationError(true, geoLocationWindow, map.getCenter());
+        });
+      } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, geoLocationWindow, map.getCenter());
+    }
 }
+
+tryGeolocation();
+
 
 
 function handleLocationError(browserHasGeolocation, geoLocationWindow, pos) {
