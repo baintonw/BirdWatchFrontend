@@ -17,7 +17,7 @@ let search = false;
 //Bird search initializes map, which 
 birdBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  alert('you hit it! this is the bird you are searching for: ', selected.innerText)
+  alert(`One moment while we look for your bird: ${selected.comName}`)
   search = true;
   initMap();
 })
@@ -25,10 +25,19 @@ birdBtn.addEventListener('click', (e) => {
 //Change selected bird when options change
 birdSelect.addEventListener('change', () => {
   console.log('you changed the select: ', birdSelect.options[birdSelect.options.selectedIndex])
-  selected = birdSelect.options[birdSelect.options.selectedIndex]
-  console.log('selected species Code: ', selected.dataset.speciesCode)
+  let option = birdSelect.options[birdSelect.options.selectedIndex]
+  changeSelected(option)
+  // selected = birdSelect.options[birdSelect.options.selectedIndex]
+  // console.log('selected species Code: ', selected.dataset.speciesCode)
   
 })
+
+function changeSelected(option) {
+  console.log(option.dataset.speciesCode)
+  //find the bird that has the same species code as the species code listed on the selected option
+  selected = birds.find(bird => bird.speciesCode === option.dataset.speciesCode)
+  console.log(selected)
+}
 
 // var infoWindow;
 // var contentString = '<div id="content">'+
@@ -63,6 +72,11 @@ birdSelect.addEventListener('change', () => {
 
 //Loading functions, fetch handlers
 
+function setInitialBird(array) {
+  selected = array[0]
+  console.log('this is selected when run in mapNames: ', selected)
+}
+
 function mapNames(array) {
   birds = array.map(bird => bird)
   birds.forEach(name => {
@@ -71,14 +85,16 @@ function mapNames(array) {
     option.dataset.speciesCode = `${name.speciesCode}`
     birdSelect.append(option)
   })
+  setInitialBird(birds)
 
   //the inital selected bird is the bird contained in the first in the bird array
   //this does not reset for some reason
 //   selected = birdSelect.options[0];
 }
 
-async function fetchBird(option) {
-  let speciesCode = option.dataset.speciesCode;
+async function fetchBird(selectedBird) {
+  // let speciesCode = option.dataset.speciesCode;
+  let speciesCode = selectedBird.speciesCode;
   console.log('fetching bird with this species code: ', speciesCode)
   //correctly fetches with different species code
   
@@ -94,16 +110,12 @@ async function fetchBird(option) {
     // .then(data => console.log(data))
 }
 
-
-
-
  async function initMap() {
    selectedBirdSightings = [];
    //responsible for mapping all seen birds in local area to select tag
   const response = await fetch('http://localhost:3000/api/birds/40.854038/-73.939323');
   const observations = await response.json();
   const birds = await mapNames(observations);
-
   
   //selected Bird Sightings is not updating #########################
   //fetchBird does not work on init since there is no selected, should not be called every time init is run

@@ -1,0 +1,16 @@
+#bird-names {
+    position: absolute;
+    left: 12rem;
+    top: .7rem;
+    width: 9rem;
+    height: 2rem;
+}
+
+#bird-btn {
+    width: 9rem;
+    position: absolute;
+    top: .7rem;
+    left: 22rem;
+    height: 2rem;
+}
+    
