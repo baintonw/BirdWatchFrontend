@@ -3,6 +3,23 @@ var map;
 const birdSelect = document.querySelector('#bird-names');
 const birdBtn = document.querySelector('#bird-btn');
 
+//Constants
+
+const months = {
+  0: 'January',
+  1: 'February',
+  2: 'March',
+  3: 'April',
+  4: 'May',
+  5: 'June',
+  6: 'July',
+  7: 'August',
+  8: 'September',
+  9: 'October',
+  10: 'November',
+  11: 'December'
+}
+
 //State Values
 
 //select is the species code of the selected bird, used in a location fetch
@@ -12,6 +29,7 @@ let selected;
 let selectedBirdSightings = [];
 let observations = [];
 let search = false;
+var infowindow;
 
 //Event Listeners
 //Bird search initializes map, which 
@@ -136,20 +154,9 @@ async function fetchBird(selectedBird) {
     zoom: 12
   });
 
-  var contentString = '<div id="content">'+
-      '<div id="siteNotice">'+
-      '</div>'+
-      `<h1 id="firstHeading" class="firstHeading">${selected.comName}</h1>`+
-      `<p><i>${selected.sciName}</i></p>`+ 
-      '<div id="bodyContent">'+
-      `<p>Seen at this location: ${selected.locName}</p>`+
-      `<p>Number seen: ${selected.howMany}</p>`+
-      '</div>'+
-      '</div>';
 
-  var infowindow = new google.maps.InfoWindow({
-    content: contentString
-  });
+ 
+  
 
   var geoLocationWindow = new google.maps.InfoWindow;
 
@@ -189,11 +196,42 @@ function handleLocationError(browserHasGeolocation, geoLocationWindow, pos) {
 
   //make markers for each element in given array
 function makeMarkers(array, map) {
+  
     let markers = [];
+    let infoWindows = [];
+    let contentString = '';
+    
+
     for(let i = 0; i < array.length; i++) {
       let marker = new google.maps.Marker({position: { lat: array[i]["lat"], lng: array[i]["lng"] }, map: map })
+       /*
+
+
+        currently hard coded, content string for each infoWindow should reflect each marker's information
+        markers are pulled from selectedBirdSightings
+
+
+      */
+
+      contentString = '<div id="content">'+
+      '<div id="siteNotice">'+
+      '</div>'+
+      `<h1 id="firstHeading" class="firstHeading">${array[i].comName}</h1>`+
+      `<p><i>${array[i].sciName}</i></p>`+ 
+      '<div id="bodyContent">'+
+      `<p>Seen at this location: ${array[i].locName}</p>`+
+      `<p>Number seen: ${array[i].howMany}</p>`+
+      '</div>'+
+      '</div>';
+
+  
+      infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+      infoWindows.push(infowindow)
+
       marker.addListener('click', () => {
-          infowindow.open(map, marker)
+          infoWindows[i].open(map, marker)
       });
       markers.push(marker)
     }
